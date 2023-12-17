@@ -4,4 +4,4 @@ A fun little project.
 
 ![](https://i.imgur.com/si38SUY.jpeg)
 
-Arduino (ESP32) ---websocket--> Server (Asp.net)
+Arduino (ESP32) ---API--> Server (Asp.net) --WebSocket--> Display
