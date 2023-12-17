@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Padoru23</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
+    <style>
+        body {            
+            background-color: #000;
+            color: #666;
+            overflow: hidden;
+        }
+        
+        #bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+        }
+
+        #padoru-container {
+            position: absolute;
+            top: 49%;
+            bottom: 5%;
+            left: 0;
+            right: 0;
+            /* background-color: aqua; */
+        }
+        #state {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 100%;
+            text-align: end;
+            font-size: .8763em;
+        }
+        #count{
+            position: absolute;
+            top: 60px;
+            right: 80px;
+            font-size: 11em;
+            color: #f53a3d;
+            text-align: end;
+            rotate: 8.763deg;
+            text-shadow: #444 10px 10px 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <img id="bg" src="Art/padorubg.jpg" />  <!-- https://i.ytimg.com/vi/RGAfOF1Na2I/maxresdefault.jpg -->
+    <div id="padoru-container"></div>
+
+    <span id="count">0</span>
+    <div id="state">
+        <p id="stateLabel">Ready to connect...</p>
+        <button onclick="test_send()">Padoru</button>
+    </div>
+    
+
+    <script>
+        var connectButton = document.getElementById("connectButton");
+        var stateLabel = document.getElementById("stateLabel");
+        var countLabel = document.getElementById("count");
+        var socket;
+
+        // var scheme = document.location.protocol === "https:" ? "wss" : "ws";
+        // var port = document.location.port ? (":" + document.location.port) : "";
+        // connectionUrl.value = scheme + "://" + document.location.hostname + port + "/ws" ;
+
+        function updateState() {
+            if (!socket) {
+                stateLabel.innerHTML = "Wait...";  
+            } else {
+                switch (socket.readyState) {
+                    case WebSocket.CLOSED:
+                        stateLabel.innerHTML = "Closed";                        
+                        break;
+                    case WebSocket.CLOSING:
+                        stateLabel.innerHTML = "Closing...";                        
+                        break;
+                    case WebSocket.CONNECTING:
+                        stateLabel.innerHTML = "Connecting...";                        
+                        break;
+                    case WebSocket.OPEN:
+                        stateLabel.innerHTML = "OK";
+                        break;
+                    default:
+                        stateLabel.innerHTML = "Unknown WebSocket State: " + htmlEscape(socket.readyState);
+                        break;
+                }
+            }
+        }
+
+        function test_send () {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                console.error("socket not connected");
+            }
+            socket.send('a');
+            console.log("send");
+        };
+
+
+        function connect() {
+            socket = new WebSocket('ws://'+window.location.host+'/ws');
+            socket.onopen = function (event) {
+                updateState();
+            };
+            socket.onclose = function (event) {
+                updateState();
+                setTimeout(connect, 1500);
+            };
+            socket.onerror  = function (event) {
+                updateState();
+                setTimeout(connect, 1500);
+            };
+            socket.onmessage = function (event) {
+                PadoruPadoru(event.data);
+            };
+        }
+
+        connect()
+        
+    </script>
+    <script>
+        var padoru_list = [];
+        function LoadPadoruList() {
+            fetch('/Project-Padoru/padoru.json')
+                .then((response) => response.json())
+                .then((json) =>{
+                    // console.log(json['Entries'])
+                    for(let i=0;i<json['Entries'].length;i++) {
+                        padoru_list.push("/Project-Padoru/"+json['Entries'][i]['Image']);
+                    }                    
+
+                    console.log(padoru_list)
+                } );   
+                
+                // add my list 
+                for(let i=0;i<=3;i++) {
+                    for(let j=0;j<=3;j++)  // 3x chance
+                        padoru_list.push("/Art/padorus/"+i+".png")
+                }
+        }
+        LoadPadoruList();
+
+        function PadoruPadoru(log) {            
+            console.log("Padoru Padoru "+log);  
+            countLabel.innerHTML = log;          
+            
+            // too lazy to  cusomize resolution :/
+            // use 1920*1080
+            var imageElement = document.createElement("img");
+            imageElement.src = padoru_list[Math.floor(Math.random() * padoru_list.length)]; 
+            imageElement.width = 400;
+            imageElement.height = 400;
+            imageElement.style.position = "absolute";
+            imageElement.style.left = "-20%";
+            imageElement.style.top = 80*Math.random()+-40+"%";
+
+            document.getElementById("padoru-container").appendChild(imageElement);
+
+            anime({
+                targets: imageElement,
+                left: '100%',                 
+                duration: 4000,
+                easing: getRandomEasing()
+            });
+
+            anime({
+                targets: countLabel,
+                scale: [1, 1.8763],
+                rotate: [0, 18.763],
+                direction: 'alternate',
+                duration: 300,
+                easing: 'easeOutQuad',      
+            })
+
+            setTimeout(function() {
+                imageElement.remove();
+            }, 10000);
+        }
+        function getRandomEasing() {
+            var easingFunctions = ['linear','easeInQuad','easeOutQuad','easeInOutQuad','easeOutInQuad','easeInCubic','easeOutCubic','easeInOutCubic','easeOutInCubic','easeInQuart','easeOutQuart','easeInOutQuart','easeOutInQuart','easeInQuint','easeOutQuint','easeInOutQuint','easeOutInQuint','easeInSine','easeOutSine','easeInOutSine','easeOutInSine','easeInExpo','easeOutExpo','easeInOutExpo','easeOutInExpo','easeInCirc','easeOutCirc','easeInOutCirc','easeOutInCirc','easeInBack','easeOutBack','easeInOutBack','easeOutInBack','easeInBounce','easeOutBounce','easeInOutBounce','easeOutInBounce'];
+            var randomIndex = Math.floor(Math.random() * easingFunctions.length);
+            return easingFunctions[randomIndex];
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+@Padoru23Server_HostAddress = http://localhost:5116
+
+GET {{Padoru23Server_HostAddress}}/todos/
+Accept: application/json
+
+###
+
+GET {{Padoru23Server_HostAddress}}/todos/1
+Accept: application/json
+
+###

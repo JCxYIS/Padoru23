@@ -1,0 +1,3 @@
+[submodule "Padoru23Server/wwwroot/Project-Padoru"]
+	path = Padoru23Server/wwwroot/Project-Padoru
+	url = https://github.com/shadow578/Project-Padoru
